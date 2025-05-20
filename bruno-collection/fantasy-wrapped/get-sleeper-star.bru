@@ -1,0 +1,14 @@
+meta {
+  name: Get Sleeper Star
+  type: http
+  seq: 6
+}
+
+get {
+  url: {{baseUrl}}/team/sleeper
+  body: none
+}
+
+auth:bearer {
+  token: {{token}}
+}

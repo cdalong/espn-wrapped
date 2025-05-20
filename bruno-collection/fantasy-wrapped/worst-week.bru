@@ -1,0 +1,14 @@
+meta {
+  name: Worst Week
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{baseUrl}}/team/worst-week
+  body: none
+}
+
+auth:bearer {
+  token: {{token}}
+}

@@ -1,0 +1,14 @@
+meta {
+  name: Best Week
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{baseUrl}}/team/best-week
+  body: none
+}
+
+auth:bearer {
+  token: {{token}}
+}

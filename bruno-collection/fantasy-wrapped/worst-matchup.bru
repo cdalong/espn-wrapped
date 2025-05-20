@@ -1,0 +1,14 @@
+meta {
+  name: Worst Matchup
+  type: http
+  seq: 10
+}
+
+get {
+  url: {{baseUrl}}/team/worst-matchup
+  body: none
+}
+
+auth:bearer {
+  token: {{token}}
+}

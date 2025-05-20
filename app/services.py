@@ -3,6 +3,7 @@ from espn_api.basketball import * # espn api says to only import league, but thi
 import requests
 
 # stats does not include playoffs
+# i should standardize retrun types so its more convinient
 class Services:
 
     # league_id is specific to league, year is season year, espn_s2 and swid are cookies
@@ -113,7 +114,7 @@ class Services:
                 if point_diff <= point_diff_threshold:
                     final_games = self.league.box_scores(i + 1, 6, False)
                     for box_score in final_games:
-                        if (s.team == box_score.home_team) or (s.team == box_score.away_team):
+                        if (self.team == box_score.home_team) or (self.team == box_score.away_team):
                             matchup = box_score
                             print(box_score.home_lineup) # home lineup pops up empty??????
                             break
@@ -153,7 +154,7 @@ class Services:
     def find_worst_team_matchup(self) -> str | Team:
         loss_counts = {}
 
-        for matchup in team.schedule:
+        for matchup in self.team.schedule:
             home_score = matchup.home_final_score
             away_score = matchup.away_final_score
 
@@ -170,8 +171,8 @@ class Services:
     
 
 # my swid used for testing 
-# s = Services(league_id=332773775, year=2025, espn_s2='AEB%2FraVAzJUuPQQx%2FZbZyHlQBgCLq%2FRJZeRW%2FD2PS9L1c89tj7UCmG7Y8jGvoYKhToVRtrWmOV8wHyGr8PkOlQJ%2Bc6WyPrTJHE8s2fgroHPV2Z3vA3Hp1QbO0ZlHFu0YvNBT1OMvExX1l7vPZPi5Is4Fmqx8AJDu8aGb5sdXtY5G1oEJ5imB9sjcwj3QUnA0lBdCWbQ%2BUcs%2FDnBNkWDd%2Fe191amCJFp7S0%2BnH1ut5HMOPlo%2B6gh3FhScoJQNIhqkGL2gQr0Bv0WIrSA%2F7Cg8ywpJPBwCDr9tpfwAmfqFWYzABQ%3D%3D', swid='{1A576FEF-EB0A-4EAC-A122-54A7CB7DD0FF}')
-
+s = Services(league_id=332773775, year=2025, espn_s2='AEB%2FraVAzJUuPQQx%2FZbZyHlQBgCLq%2FRJZeRW%2FD2PS9L1c89tj7UCmG7Y8jGvoYKhToVRtrWmOV8wHyGr8PkOlQJ%2Bc6WyPrTJHE8s2fgroHPV2Z3vA3Hp1QbO0ZlHFu0YvNBT1OMvExX1l7vPZPi5Is4Fmqx8AJDu8aGb5sdXtY5G1oEJ5imB9sjcwj3QUnA0lBdCWbQ%2BUcs%2FDnBNkWDd%2Fe191amCJFp7S0%2BnH1ut5HMOPlo%2B6gh3FhScoJQNIhqkGL2gQr0Bv0WIrSA%2F7Cg8ywpJPBwCDr9tpfwAmfqFWYzABQ%3D%3D', swid='{1A576FEF-EB0A-4EAC-A122-54A7CB7DD0FF}')
+print(s.find_clutch_player())
     
 
    

@@ -1,0 +1,32 @@
+meta {
+  name: Login
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/login
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "league_id": {{league_id}},
+    "year": {{year}},
+    "espn_s2": "{{espn_s2}}",
+    "swid": "{{swid}}"
+  }
+}
+
+tests {
+  // Test for successful login
+  test("Status should be 200", function() {
+    expect(res.status).to.equal(200);
+  });
+  
+  // Capture the token for future requests
+  if (res.status === 200 && res.body.session_id) {
+    bru.setEnvVar("token", res.body.session_id);
+  }
+}
