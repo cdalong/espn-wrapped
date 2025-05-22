@@ -69,7 +69,8 @@ async def get_best_week_route():
     try:
         if current_services is None:
             raise HTTPException(status_code=400, detail="Services not initialized. Call /initialize first.")
-        return current_services.get_best_week()
+        best_week, best_score = current_services.get_best_week()
+        return f"Week: {best_week}, Score: {int(best_score)}"
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -79,7 +80,8 @@ async def get_worst_week_route():
     try:
         if current_services is None:
             raise HTTPException(status_code=400, detail="Services not initialized. Call /initialize first.")
-        return current_services.get_worst_week()
+        worst_week, worst_score = current_services.get_worst_week()
+        return f"Week: {worst_week}, Score: {int(worst_score)}"
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -89,7 +91,8 @@ async def get_longest_streak_route():
     try:
         if current_services is None:
             raise HTTPException(status_code=400, detail="Services not initialized. Call /initialize first.")
-        return current_services.get_longest_streak()
+        wins, loss = current_services.get_longest_streak()
+        return f"Longest Win Streak: {wins}, Longest Loss Streak: {loss}"
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -99,7 +102,8 @@ async def get_sleeper_star_route():
     try:
         if current_services is None:
             raise HTTPException(status_code=400, detail="Services not initialized. Call /initialize first.")
-        return current_services.get_sleeper_star()
+        name, actual, projected = current_services.get_sleeper_star()
+        return f"Name: {name}, Average: {actual}, Projected: {projected}"
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -109,7 +113,8 @@ async def get_bust_route():
     try:
         if current_services is None:
             raise HTTPException(status_code=400, detail="Services not initialized. Call /initialize first.")
-        return current_services.get_bust()
+        name, actual, projected = current_services.get_bust()
+        return f"Name: {name}, Average: {actual}, Projected: {projected}"
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -129,7 +134,8 @@ async def find_best_team_matchup_route():
     try:
         if current_services is None:
             raise HTTPException(status_code=400, detail="Services not initialized. Call /initialize first.")
-        return current_services.find_best_team_matchup()
+        team, wins = current_services.find_best_team_matchup()
+        return f"Team: {team}, Wins: {wins}, Losses: {4 - wins}"
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -139,7 +145,8 @@ async def find_worst_team_matchup_route():
     try:
         if current_services is None:
             raise HTTPException(status_code=400, detail="Services not initialized. Call /initialize first.")
-        return current_services.find_worst_team_matchup()
+        team, losses = current_services.find_worst_team_matchup()
+        return f"Team: {team}, Wins: {4- losses}, Losses: {losses}"
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
