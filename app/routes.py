@@ -1,130 +1,152 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
-from app.services import Services
 from espn_api.basketball import League
-from fastapi.security import OAuth2PasswordRequestForm
-import uuid
-from app.auth import ESPNCredentials, SessionToken, active_sessions, get_current_session, WrappedSession
-
+from app.services import Services
 
 
 router = APIRouter()
+
+# Global variable to store current services instance
+current_services = None
+
+
+class ESPNCredentials(BaseModel):
+    league_id: int
+    year: int
+    espn_s2: str
+    swid: str
+
 
 @router.get("/")
 def read_root():
     return {"message": "Welcome to Fantasy Wrapped!"}
 
-@router.post("/login", response_model=SessionToken)
-async def login(credentials: ESPNCredentials):
+
+@router.post("/initialize")
+async def initialize_services(credentials: ESPNCredentials):
+    """Initialize services with ESPN credentials"""
     try:
-        # Try to initialize the services to validate credentials
-        services = Services(
+        global current_services
+        current_services = Services(
             league_id=credentials.league_id,
             year=credentials.year,
             espn_s2=credentials.espn_s2,
             swid=credentials.swid
         )
-        
-        # Verify the credentials work by accessing the team property
-        if services.team is None:
-            raise HTTPException(status_code=401, detail="Invalid ESPN credentials")
-        
-        # Create a session ID
-        session_id = str(uuid.uuid4())
-        
-        # Store the session in memory
-        active_sessions[session_id] = WrappedSession(
-            credentials=credentials,
-            services=services
-        )
-        
-        return {"session_id": session_id}
-    
-    except Exception as e:
-        raise HTTPException(status_code=401, detail=f"Authentication failed: {str(e)}")
 
-# end points??
+        # Verify the credentials work by accessing the team property
+        if current_services.team is None:
+            raise HTTPException(status_code=400, detail="Invalid ESPN credentials")
+
+        return {"message": "Services initialized successfully"}
+
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Initialization failed: {str(e)}")
+
+
 @router.get("/team/find-trae")
-async def find_trae_young_route(session: WrappedSession = Depends(get_current_session)):  
+async def find_trae_young_route():
     try:
-        return session.services.find_trae_young()
+        if current_services is None:
+            raise HTTPException(status_code=400, detail="Services not initialized. Call /initialize first.")
+        return current_services.find_trae_young()
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
 
 @router.get("/team/weekly-average")
-async def get_weekly_average_route(session: WrappedSession = Depends(get_current_session)):
+async def get_weekly_average_route():
     try:
-        return session.services.get_weekly_average()
+        if current_services is None:
+            raise HTTPException(status_code=400, detail="Services not initialized. Call /initialize first.")
+        return current_services.get_weekly_average()
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-    
+
 
 @router.get("/team/best-week")
-async def get_best_week_route(session: WrappedSession = Depends(get_current_session)):
+async def get_best_week_route():
     try:
-        return session.services.get_best_week()
+        if current_services is None:
+            raise HTTPException(status_code=400, detail="Services not initialized. Call /initialize first.")
+        return current_services.get_best_week()
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-    
+
+
 @router.get("/team/worst-week")
-async def get_worst_week_route(session: WrappedSession = Depends(get_current_session)):
+async def get_worst_week_route():
     try:
-        return session.services.get_worst_week()
+        if current_services is None:
+            raise HTTPException(status_code=400, detail="Services not initialized. Call /initialize first.")
+        return current_services.get_worst_week()
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-    
+
+
 @router.get("/team/longest-streak")
-async def get_longest_streak_route(session: WrappedSession = Depends(get_current_session)):
+async def get_longest_streak_route():
     try:
-        return session.services.get_longest_streak()
+        if current_services is None:
+            raise HTTPException(status_code=400, detail="Services not initialized. Call /initialize first.")
+        return current_services.get_longest_streak()
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))  
-    
+        raise HTTPException(status_code=500, detail=str(e))
+
 
 @router.get("/team/sleeper")
-async def get_sleeper_star_route(session: WrappedSession = Depends(get_current_session)):
+async def get_sleeper_star_route():
     try:
-        return session.services.get_sleeper_star()
+        if current_services is None:
+            raise HTTPException(status_code=400, detail="Services not initialized. Call /initialize first.")
+        return current_services.get_sleeper_star()
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-    
+
 
 @router.get("/team/bust")
-async def get_bust_route(session: WrappedSession = Depends(get_current_session)):
+async def get_bust_route():
     try:
-        return session.services.get_bust()   
+        if current_services is None:
+            raise HTTPException(status_code=400, detail="Services not initialized. Call /initialize first.")
+        return current_services.get_bust()
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-    
+
 
 @router.get("/team/clutch")
-async def find_clutch_player_route(session: WrappedSession = Depends(get_current_session)):
+async def find_clutch_player_route():
     try:
-        return session.services.find_clutch_player()   
+        if current_services is None:
+            raise HTTPException(status_code=400, detail="Services not initialized. Call /initialize first.")
+        return current_services.find_clutch_player()
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-    
+
 
 @router.get("/team/best-matchup")
-async def find_best_team_matchup_route(session: WrappedSession = Depends(get_current_session)):
+async def find_best_team_matchup_route():
     try:
-        return session.services.find_best_team_matchup()   
+        if current_services is None:
+            raise HTTPException(status_code=400, detail="Services not initialized. Call /initialize first.")
+        return current_services.find_best_team_matchup()
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e)) 
-    
+        raise HTTPException(status_code=500, detail=str(e))
+
 
 @router.get("/team/worst-matchup")
-async def find_worst_team_matchup_route(session: WrappedSession = Depends(get_current_session)):
+async def find_worst_team_matchup_route():
     try:
-        return session.services.find_worst_team_matchup()   
+        if current_services is None:
+            raise HTTPException(status_code=400, detail="Services not initialized. Call /initialize first.")
+        return current_services.find_worst_team_matchup()
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))  
-    
-@router.post("/logout")
-async def logout(session: WrappedSession = Depends(get_current_session)):
-    for session_id, stored_session in list(active_sessions.items()):
-        if stored_session == session:
-            del active_sessions[session_id]
-            return {"message": "Logged out successfully"}
-    
-    raise HTTPException(status_code=400, detail="No active session found")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/reset")
+async def reset_services():
+    """Reset the current services instance"""
+    global current_services
+    current_services = None
+    return {"message": "Services reset successfully"}
