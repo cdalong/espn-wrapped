@@ -1,7 +1,8 @@
 from fastapi import FastAPI
 from app.routes import router
 from fastapi.middleware.cors import CORSMiddleware
-
+# npm start
+# python -m app.main
 
 app = FastAPI(
     title="Fantasy Basketball Wrapped API",
