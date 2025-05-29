@@ -178,6 +178,21 @@ class Services:
         worst_opponent = max(loss_counts, key=loss_counts.get)
         return worst_opponent.team_name, loss_counts[worst_opponent]
     
+    def get_biggest_comeback(self):
+        pass
+
+    def draft_steal(self):
+        pass
+
+    def draft_bust(self):
+        pass
+
+    def bonus_title(self):
+        pass # underdog, overrated, longest winstreak of league, cakewalk (way more points for than against, most drops/aquisitions than leage)
+
+    def missing_points(self):
+        pass # points left on bench
+    
 
 # my swid used for testing 
 # s = Services(league_id=332773775, year=2025, espn_s2='AEB%2FraVAzJUuPQQx%2FZbZyHlQBgCLq%2FRJZeRW%2FD2PS9L1c89tj7UCmG7Y8jGvoYKhToVRtrWmOV8wHyGr8PkOlQJ%2Bc6WyPrTJHE8s2fgroHPV2Z3vA3Hp1QbO0ZlHFu0YvNBT1OMvExX1l7vPZPi5Is4Fmqx8AJDu8aGb5sdXtY5G1oEJ5imB9sjcwj3QUnA0lBdCWbQ%2BUcs%2FDnBNkWDd%2Fe191amCJFp7S0%2BnH1ut5HMOPlo%2B6gh3FhScoJQNIhqkGL2gQr0Bv0WIrSA%2F7Cg8ywpJPBwCDr9tpfwAmfqFWYzABQ%3D%3D', swid='{1A576FEF-EB0A-4EAC-A122-54A7CB7DD0FF}')

@@ -109,7 +109,15 @@ const FantasyBasketballWrapped = () => {
 
   if (!isInitialized) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 flex items-center justify-center p-4">
+      <div 
+        className="min-h-screen flex items-center justify-center p-4"
+        style={{
+          backgroundImage: `url('/tyrese.jpg')`,
+          backgroundSize: '50% 100%', // Each image takes half the width, full height
+          backgroundPosition: '0% 50%, 100% 50%', // Position images side by side
+          backgroundRepeat: 'repeat-x' // Repeat horizontally to ensure two instances
+        }}
+      >
         <div className="w-full max-w-md">
           <div className="bg-white/10 backdrop-blur-lg p-8 rounded-2xl shadow-2xl border border-white/20">
             <div className="text-center mb-8">
@@ -194,7 +202,15 @@ const FantasyBasketballWrapped = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 p-4">
+    <div 
+      className="min-h-screen p-4"
+      style={{
+        backgroundImage: `url('/tyrese.jpg')`,
+        backgroundSize: '50% 100%', // Each image takes half the width, full height
+        backgroundPosition: '0% 50%, 100% 50%', // Position images side by side
+        backgroundRepeat: 'repeat-x' // Repeat horizontally to ensure two instances
+      }}
+    >
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="text-center mb-12">

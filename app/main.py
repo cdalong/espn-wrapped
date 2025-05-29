@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from app.routes import router
 from fastapi.middleware.cors import CORSMiddleware
+# cd fantasy-basketball-frontend
 # npm start
 # python -m app.main
 
