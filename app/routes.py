@@ -149,7 +149,36 @@ async def find_worst_team_matchup_route():
         return f"Team: {team}, Wins: {4- losses}, Losses: {losses}"
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+    
+@router.get("/team/biggest-comeback")
+async def get_biggest_comeback_route():
+    try:
+        if current_services is None:
+            raise HTTPException(status_code=400, detail="Services not initialized. Call /initialize first.")
+        comeback_deficit, week, opponent = current_services.get_biggest_comeback()
+        return f"Week: {week}, Opponent: {opponent}, Deficit: {comeback_deficit}"
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    
+@router.get("/team/bonus-title")
+async def bonus_title_route():
+    try:
+        if current_services is None:
+            raise HTTPException(status_code=400, detail="Services not initialized. Call /initialize first.")
+        titles = current_services.bonus_title()
+        return f"Titles: {titles}"
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
+@router.get("/team/missing-points")
+async def missing_points_route():
+    try:
+        if current_services is None:
+            raise HTTPException(status_code=400, detail="Services not initialized. Call /initialize first.")
+        missing_points = current_services.missing_points()
+        return f"Missed Points: {missing_points}"
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/reset")
 async def reset_services():
