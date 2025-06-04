@@ -33,7 +33,7 @@ class Services:
         #Im gonna find trae young!
         for player in self.team.roster:
             if "trae young" in player.name.lower():
-                return "found trae young!"
+                return "Found Trae Young!"
               
         return "didn't find trae young aw man"
 

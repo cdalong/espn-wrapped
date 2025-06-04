@@ -134,7 +134,10 @@ async def find_best_team_matchup_route():
     try:
         if current_services is None:
             raise HTTPException(status_code=400, detail="Services not initialized. Call /initialize first.")
-        team, wins = current_services.find_best_team_matchup()
+        result = current_services.find_best_team_matchup()
+        if isinstance(result, str):
+            return result
+        team, wins = result
         return f"Team: {team}, Wins: {wins}, Losses: {4 - wins}"
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -145,30 +148,38 @@ async def find_worst_team_matchup_route():
     try:
         if current_services is None:
             raise HTTPException(status_code=400, detail="Services not initialized. Call /initialize first.")
-        team, losses = current_services.find_worst_team_matchup()
-        return f"Team: {team}, Wins: {4- losses}, Losses: {losses}"
+        result = current_services.find_worst_team_matchup()
+        if isinstance(result, str):
+            return result
+        team, losses = result
+        return f"Team: {team}, Wins: {4 - losses}, Losses: {losses}"
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
     
+
 @router.get("/team/biggest-comeback")
 async def get_biggest_comeback_route():
     try:
         if current_services is None:
             raise HTTPException(status_code=400, detail="Services not initialized. Call /initialize first.")
         comeback_deficit, week, opponent = current_services.get_biggest_comeback()
-        return f"Week: {week}, Opponent: {opponent}, Deficit: {comeback_deficit}"
+        return f"Week: {week}, Opponent: {opponent.team_name if hasattr(opponent, 'team_name') else opponent}, Deficit: {comeback_deficit}"
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
     
-@router.get("/team/bonus-title")
-async def bonus_title_route():
+
+# Fixed endpoint name to match React app expectation
+@router.get("/team/bonus-titles")
+async def bonus_titles_route():
     try:
         if current_services is None:
             raise HTTPException(status_code=400, detail="Services not initialized. Call /initialize first.")
         titles = current_services.bonus_title()
-        return f"Titles: {titles}"
+        # Return titles as a comma-separated string for easier parsing in React
+        return ", ".join(titles)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
 
 @router.get("/team/missing-points")
 async def missing_points_route():
@@ -176,9 +187,10 @@ async def missing_points_route():
         if current_services is None:
             raise HTTPException(status_code=400, detail="Services not initialized. Call /initialize first.")
         missing_points = current_services.missing_points()
-        return f"Missed Points: {missing_points}"
+        return str(missing_points)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
 
 @router.post("/reset")
 async def reset_services():
