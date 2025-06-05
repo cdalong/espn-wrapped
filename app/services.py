@@ -11,13 +11,16 @@ class Services:
     # league_id is specific to league, year is season year, espn_s2 and swid are cookies
     # espn_s2 grants permission to access fantasy league data
     # swid is specific to user and allows us to idenitfy which team is theirs
-    def __init__(self, league_id: int, year: int, espn_s2: str, swid: str):
-        self.league = League(
+    def __init__(self, league_id: int, year: int, espn_s2: str, swid: str, league_instance=None):
+        if league_instance:
+            self.league = league_instance
+        else :
+            self.league = League(
             league_id=league_id,
             year=year,
             espn_s2=espn_s2,
             swid=swid
-        )
+            )
         self.team = None
         
         for team in self.league.teams:

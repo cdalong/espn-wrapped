@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Trophy, TrendingUp, TrendingDown, Target, Star, AlertTriangle, Zap, Users, BarChart3, ChevronLeft, ChevronRight } from 'lucide-react';
 
 const FantasyBasketballWrapped = () => {
@@ -6,8 +6,11 @@ const FantasyBasketballWrapped = () => {
     league_id: '',
     year: 2025,
     espn_s2: '',
-    swid: ''
+    swid: '',
+    username: '',
+    password: ''
   });
+  const [authMethod, setAuthMethod] = useState('cookies'); // 'cookies' or 'login'
   const [isInitialized, setIsInitialized] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -24,41 +27,10 @@ const FantasyBasketballWrapped = () => {
     'overrated': 'Underperformed your projected total points', 
     'cakewalk': 'Biggest positive difference in PF vs PA',
     'toughie': 'Biggest negative difference in PF vs PA',
-    'quick hands': 'You had the most pick-ups throughout the league ',
-    'longest win streak':'Stellar performance!',
-    'longest loss streak':'Maybe next year is your year',
-    'participation trophy':'Uh, at least you showed up and had fun!'
-  };
-
-  const handleInitialize = async () => {
-    setLoading(true);
-    setError('');
-    
-    try {
-      const response = await fetch(`${API_BASE}/initialize`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          league_id: parseInt(credentials.league_id),
-          year: credentials.year,
-          espn_s2: credentials.espn_s2,
-          swid: credentials.swid
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to initialize. Please check your credentials.');
-      }
-
-      setIsInitialized(true);
-      await loadAllStats();
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
+    'quick hands': 'You had the most pick-ups throughout the league',
+    'longest win streak': 'Stellar performance!',
+    'longest loss streak': 'Maybe next year is your year',
+    'participation trophy': 'Uh, at least you showed up and had fun!'
   };
 
   const fetchStat = async (endpoint) => {
@@ -90,13 +62,84 @@ const FantasyBasketballWrapped = () => {
       '/team/missing-points'
     ];
 
-    const results = {};
-    for (const endpoint of endpoints) {
-      results[endpoint] = await fetchStat(endpoint);
+    try {
+      const results = await Promise.all(
+        endpoints.map(endpoint => fetchStat(endpoint))
+      );
+      
+      const statsData = {
+        trae: results[0],
+        weeklyAverage: results[1],
+        bestWeek: results[2],
+        worstWeek: results[3],
+        longestStreak: results[4],
+        sleeper: results[5],
+        bust: results[6],
+        clutch: results[7],
+        bestMatchup: results[8],
+        worstMatchup: results[9],
+        biggestComeback: results[10],
+        bonusTitles: results[11],
+        missingPoints: results[12]
+      };
+      
+      setStats(statsData);
+    } catch (err) {
+      setError('Failed to load stats: ' + err.message);
+    } finally {
+      setLoading(false);
     }
+  };
+
+  const handleInitialize = async () => {
+    setLoading(true);
+    setError('');
     
-    setStats(results);
-    setLoading(false);
+    try {
+      const requestBody = {
+        league_id: parseInt(credentials.league_id),
+        year: credentials.year,
+      };
+
+      // Add authentication fields based on selected method
+      if (authMethod === 'cookies') {
+        requestBody.espn_s2 = credentials.espn_s2;
+        requestBody.swid = credentials.swid;
+      } else {
+        requestBody.username = credentials.username;
+        requestBody.password = credentials.password;
+      }
+
+      const response = await fetch(`${API_BASE}/initialize`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestBody),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.detail || 'Failed to initialize. Please check your credentials.');
+      }
+
+      setIsInitialized(true);
+      await loadAllStats();
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const isFormValid = () => {
+    if (!credentials.league_id) return false;
+    
+    if (authMethod === 'cookies') {
+      return credentials.espn_s2 && credentials.swid;
+    } else {
+      return credentials.username && credentials.password;
+    }
   };
 
   // Helper function to clean and format stat data
@@ -196,7 +239,7 @@ const FantasyBasketballWrapped = () => {
           <div className="w-32 h-32 bg-gradient-to-br from-orange-400 to-orange-600 rounded-full flex items-center justify-center mx-auto mb-8">
             <Target className="h-16 w-16 text-white" />
           </div>
-          <StructuredDataDisplay data={formatStat(stats['/team/find-trae'])} />
+          <StructuredDataDisplay data={formatStat(stats.trae)} />
           <p className="text-xl text-white/80 max-w-2xl mx-auto mt-8">
             Every fantasy manager has their white whale. Here's how your hunt went this season.
           </p>
@@ -212,7 +255,7 @@ const FantasyBasketballWrapped = () => {
             <BarChart3 className="h-16 w-16 text-white" />
           </div>
           <div className="text-6xl font-bold text-white mb-4">
-            {stats['/team/weekly-average'] ? `${parseFloat(formatStat(stats['/team/weekly-average'])).toFixed(1)}` : 'Loading...'}
+            {stats.weeklyAverage ? `${parseFloat(formatStat(stats.weeklyAverage)).toFixed(1)}` : 'Loading...'}
           </div>
           <div className="text-2xl text-white/80 mb-8">points per week</div>
           <p className="text-xl text-white/80 max-w-2xl mx-auto">
@@ -229,7 +272,7 @@ const FantasyBasketballWrapped = () => {
           <div className="w-32 h-32 bg-gradient-to-br from-green-500 to-green-600 rounded-full flex items-center justify-center mx-auto mb-8">
             <Trophy className="h-16 w-16 text-white" />
           </div>
-          <StructuredDataDisplay data={formatStat(stats['/team/best-week'])} />
+          <StructuredDataDisplay data={formatStat(stats.bestWeek)} />
           <p className="text-xl text-white/80 max-w-2xl mx-auto mt-8">
             Remember this week? Everything clicked. Your lineup was fire, and the points kept coming.
           </p>
@@ -244,7 +287,7 @@ const FantasyBasketballWrapped = () => {
           <div className="w-32 h-32 bg-gradient-to-br from-red-500 to-red-600 rounded-full flex items-center justify-center mx-auto mb-8">
             <TrendingDown className="h-16 w-16 text-white" />
           </div>
-          <StructuredDataDisplay data={formatStat(stats['/team/worst-week'])} />
+          <StructuredDataDisplay data={formatStat(stats.worstWeek)} />
           <p className="text-xl text-white/80 max-w-2xl mx-auto mt-8">
             Every champion has their low points. This week tested your resolve, but you bounced back stronger.
           </p>
@@ -259,7 +302,7 @@ const FantasyBasketballWrapped = () => {
           <div className="w-32 h-32 bg-gradient-to-br from-purple-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-8">
             <TrendingUp className="h-16 w-16 text-white" />
           </div>
-          <StructuredDataDisplay data={formatStat(stats['/team/longest-streak'])} />
+          <StructuredDataDisplay data={formatStat(stats.longestStreak)} />
           <p className="text-xl text-white/80 max-w-2xl mx-auto mt-8">
             Momentum is everything. Here are your longest winning and losing streaks this season.
           </p>
@@ -274,7 +317,7 @@ const FantasyBasketballWrapped = () => {
           <div className="w-32 h-32 bg-gradient-to-br from-yellow-400 to-yellow-500 rounded-full flex items-center justify-center mx-auto mb-8">
             <Star className="h-16 w-16 text-white" />
           </div>
-          <StructuredDataDisplay data={formatStat(stats['/team/sleeper'])} />
+          <StructuredDataDisplay data={formatStat(stats.sleeper)} />
           <p className="text-xl text-white/80 max-w-2xl mx-auto mt-8">
             While others slept, you saw the potential. This player exceeded all expectations.
           </p>
@@ -289,7 +332,7 @@ const FantasyBasketballWrapped = () => {
           <div className="w-32 h-32 bg-gradient-to-br from-red-500 to-red-600 rounded-full flex items-center justify-center mx-auto mb-8">
             <AlertTriangle className="h-16 w-16 text-white" />
           </div>
-          <StructuredDataDisplay data={formatStat(stats['/team/bust'])} />
+          <StructuredDataDisplay data={formatStat(stats.bust)} />
           <p className="text-xl text-white/80 max-w-2xl mx-auto mt-8">
             High expectations, low returns. Even the best drafters have their misses.
           </p>
@@ -304,7 +347,7 @@ const FantasyBasketballWrapped = () => {
           <div className="w-32 h-32 bg-gradient-to-br from-orange-500 to-orange-600 rounded-full flex items-center justify-center mx-auto mb-8">
             <Zap className="h-16 w-16 text-white" />
           </div>
-          <StructuredDataDisplay data={formatStat(stats['/team/clutch'])} />
+          <StructuredDataDisplay data={formatStat(stats.clutch)} />
           <p className="text-xl text-white/80 max-w-2xl mx-auto mt-8">
             When the pressure was on, this player delivered. Your most dependable fantasy asset.
           </p>
@@ -319,7 +362,7 @@ const FantasyBasketballWrapped = () => {
           <div className="w-32 h-32 bg-gradient-to-br from-green-500 to-green-600 rounded-full flex items-center justify-center mx-auto mb-8">
             <Users className="h-16 w-16 text-white" />
           </div>
-          <StructuredDataDisplay data={formatStat(stats['/team/best-matchup'])} />
+          <StructuredDataDisplay data={formatStat(stats.bestMatchup)} />
           <p className="text-xl text-white/80 max-w-2xl mx-auto mt-8">
             Some matchups just click. This opponent brought out the best in your lineup.
           </p>
@@ -334,7 +377,7 @@ const FantasyBasketballWrapped = () => {
           <div className="w-32 h-32 bg-gradient-to-br from-red-500 to-red-600 rounded-full flex items-center justify-center mx-auto mb-8">
             <Users className="h-16 w-16 text-white" />
           </div>
-          <StructuredDataDisplay data={formatStat(stats['/team/worst-matchup'])} />
+          <StructuredDataDisplay data={formatStat(stats.worstMatchup)} />
           <p className="text-xl text-white/80 max-w-2xl mx-auto mt-8">
             Every hero has their nemesis. This team always seemed to have your number.
           </p>
@@ -349,7 +392,7 @@ const FantasyBasketballWrapped = () => {
           <div className="w-32 h-32 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center mx-auto mb-8">
             <TrendingUp className="h-16 w-16 text-white" />
           </div>
-          <StructuredDataDisplay data={formatStat(stats['/team/biggest-comeback'])} />
+          <StructuredDataDisplay data={formatStat(stats.biggestComeback)} />
           <p className="text-xl text-white/80 max-w-2xl mx-auto mt-8">
             Down but not out! This was your most impressive comeback victory of the season.
           </p>
@@ -366,7 +409,7 @@ const FantasyBasketballWrapped = () => {
           </div>
           <div className="text-center">
             {(() => {
-              const titles = formatStat(stats['/team/bonus-titles']);
+              const titles = formatStat(stats.bonusTitles);
               if (Array.isArray(titles)) {
                 return (
                   <div className="flex flex-wrap justify-center gap-3">
@@ -403,7 +446,7 @@ const FantasyBasketballWrapped = () => {
             <AlertTriangle className="h-16 w-16 text-white" />
           </div>
           <div className="text-6xl font-bold text-white mb-4">
-            {stats['/team/missing-points'] ? parseFloat(formatStat(stats['/team/missing-points'])).toFixed(1) : 'Loading...'}
+            {stats.missingPoints ? parseFloat(formatStat(stats.missingPoints)).toFixed(1) : 'Loading...'}
           </div>
           <div className="text-2xl text-white/80 mb-8">points on the bench</div>
           <p className="text-xl text-white/80 max-w-2xl mx-auto">
@@ -429,7 +472,7 @@ const FantasyBasketballWrapped = () => {
             onClick={() => {
               setIsInitialized(false);
               setStats({});
-              setCredentials({ league_id: '', year: 2025, espn_s2: '', swid: '' });
+              setCredentials({ league_id: '', year: 2025, espn_s2: '', swid: '', username: '', password: '' });
               setCurrentPage(0);
             }}
             className="bg-gradient-to-r from-purple-500 to-purple-600 text-white px-8 py-3 rounded-lg font-semibold hover:from-purple-600 hover:to-purple-700 transition-all duration-200 transform hover:scale-105"
@@ -471,7 +514,7 @@ const FantasyBasketballWrapped = () => {
     }
   };
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (isInitialized) {
       window.addEventListener('keydown', handleKeyPress);
       return () => window.removeEventListener('keydown', handleKeyPress);
@@ -505,6 +548,32 @@ const FantasyBasketballWrapped = () => {
               </div>
             )}
 
+            {/* Authentication Method Selector */}
+            <div className="mb-6">
+              <div className="flex bg-white/5 rounded-lg p-1">
+                <button
+                  onClick={() => setAuthMethod('cookies')}
+                  className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all duration-200 ${
+                    authMethod === 'cookies' 
+                      ? 'bg-orange-500 text-white shadow-md' 
+                      : 'text-white/70 hover:text-white hover:bg-white/10'
+                  }`}
+                >
+                  Cookies
+                </button>
+                <button
+                  onClick={() => setAuthMethod('login')}
+                  className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all duration-200 ${
+                    authMethod === 'login' 
+                      ? 'bg-orange-500 text-white shadow-md' 
+                      : 'text-white/70 hover:text-white hover:bg-white/10'
+                  }`}
+                >
+                  Username/Password
+                </button>
+              </div>
+            </div>
+
             <div className="space-y-4">
               <div>
                 <label className="block text-white/80 text-sm font-medium mb-2">League ID</label>
@@ -527,43 +596,97 @@ const FantasyBasketballWrapped = () => {
                 />
               </div>
 
-              <div>
-                <label className="block text-white/80 text-sm font-medium mb-2">ESPN_S2</label>
-                <input
-                  type="text"
-                  value={credentials.espn_s2}
-                  onChange={(e) => setCredentials({...credentials, espn_s2: e.target.value})}
-                  className="w-full p-3 rounded-lg bg-white/10 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-orange-500"
-                  placeholder="Your ESPN_S2 cookie"
-                />
-              </div>
+              {/* Conditional Authentication Fields */}
+              {authMethod === 'cookies' ? (
+                <>
+                  <div>
+                    <label className="block text-white/80 text-sm font-medium mb-2">
+                      ESPN_S2 Cookie
+                      <span className="text-orange-400 ml-1">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={credentials.espn_s2}
+                      onChange={(e) => setCredentials({...credentials, espn_s2: e.target.value})}
+                      className="w-full p-3 rounded-lg bg-white/10 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                      placeholder="Your ESPN_S2 cookie"
+                    />
+                  </div>
 
-              <div>
-                <label className="block text-white/80 text-sm font-medium mb-2">SWID</label>
-                <input
-                  type="text"
-                  value={credentials.swid}
-                  onChange={(e) => setCredentials({...credentials, swid: e.target.value})}
-                  className="w-full p-3 rounded-lg bg-white/10 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-orange-500"
-                  placeholder="Your SWID cookie"
-                />
-              </div>
+                  <div>
+                    <label className="block text-white/80 text-sm font-medium mb-2">
+                      SWID Cookie
+                      <span className="text-orange-400 ml-1">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={credentials.swid}
+                      onChange={(e) => setCredentials({...credentials, swid: e.target.value})}
+                      className="w-full p-3 rounded-lg bg-white/10 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                      placeholder="Your SWID cookie"
+                    />
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div>
+                    <label className="block text-white/80 text-sm font-medium mb-2">
+                      ESPN Username
+                      <span className="text-orange-400 ml-1">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={credentials.username}
+                      onChange={(e) => setCredentials({...credentials, username: e.target.value})}
+                      className="w-full p-3 rounded-lg bg-white/10 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                      placeholder="Your ESPN username"
+                      autoComplete="username"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-white/80 text-sm font-medium mb-2">
+                      ESPN Password
+                      <span className="text-orange-400 ml-1">*</span>
+                    </label>
+                    <input
+                      type="password"
+                      value={credentials.password}
+                      onChange={(e) => setCredentials({...credentials, password: e.target.value})}
+                      className="w-full p-3 rounded-lg bg-white/10 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                      placeholder="Your ESPN password"
+                      autoComplete="current-password"
+                    />
+                  </div>
+                </>
+              )}
 
               <button
                 onClick={handleInitialize}
-                disabled={loading || !credentials.league_id || !credentials.espn_s2 || !credentials.swid}
+                disabled={loading || !isFormValid()}
                 className="w-full bg-gradient-to-r from-orange-500 to-orange-600 text-white py-3 px-6 rounded-lg font-semibold hover:from-orange-600 hover:to-orange-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 transform hover:scale-[1.02]"
               >
-                {loading ? 'Loading...' : 'Get My Wrapped'}
+                {loading ? 'Connecting to ESPN...' : 'Get My Wrapped'}
               </button>
             </div>
 
             <div className="mt-6 text-center">
               <p className="text-white/60 text-sm">
-                Need help finding your cookies?{' '}
-                <a href="#" className="text-orange-400 hover:text-orange-300 underline">
-                  Check the guide
-                </a>
+                {authMethod === 'cookies' ? (
+                  <>
+                    Need help finding your cookies?{' '}
+                    <a href="#" className="text-orange-400 hover:text-orange-300 underline">
+                      Check the guide
+                    </a>
+                  </>
+                ) : (
+                  <>
+                    Use your regular ESPN login credentials
+                  </>
+                )}
+              </p>
+              <p className="text-white/50 text-xs mt-2">
+                Your credentials are only used to access your fantasy data and are not stored.
               </p>
             </div>
           </div>
@@ -653,6 +776,6 @@ const FantasyBasketballWrapped = () => {
       )}
     </div>
   );
-};
+}
 
 export default FantasyBasketballWrapped;
