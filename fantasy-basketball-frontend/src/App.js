@@ -18,6 +18,8 @@ const FantasyBasketballWrapped = () => {
   const [currentPage, setCurrentPage] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [hoveredTitle, setHoveredTitle] = useState(null);
+  const [showGuide, setShowGuide] = useState(false);
+
 
   const API_BASE = 'http://localhost:8000';
 
@@ -523,175 +525,267 @@ const FantasyBasketballWrapped = () => {
 
   if (!isInitialized) {
     return (
-      <div 
-        className="min-h-screen flex items-center justify-center p-4"
-        style={{
-          backgroundImage: `url('/tyrese.jpg')`,
-          backgroundSize: '50% 100%',
-          backgroundPosition: '0% 50%, 100% 50%',
-          backgroundRepeat: 'repeat-x'
-        }}
-      >
-        <div className="w-full max-w-md">
-          <div className="bg-white/10 backdrop-blur-lg p-8 rounded-2xl shadow-2xl border border-white/20">
-            <div className="text-center mb-8">
-              <div className="w-16 h-16 bg-gradient-to-br from-orange-400 to-orange-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                <BarChart3 className="h-8 w-8 text-white" />
-              </div>
-              <h1 className="text-3xl font-bold text-white mb-2">Fantasy Basketball Wrapped</h1>
-              <p className="text-white/70">Enter your ESPN Fantasy credentials to get started</p>
-            </div>
-
-            {error && (
-              <div className="bg-red-500/20 border border-red-500/50 text-red-100 p-4 rounded-lg mb-6">
-                {error}
-              </div>
-            )}
-
-            {/* Authentication Method Selector */}
-            <div className="mb-6">
-              <div className="flex bg-white/5 rounded-lg p-1">
-                <button
-                  onClick={() => setAuthMethod('cookies')}
-                  className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all duration-200 ${
-                    authMethod === 'cookies' 
-                      ? 'bg-orange-500 text-white shadow-md' 
-                      : 'text-white/70 hover:text-white hover:bg-white/10'
-                  }`}
-                >
-                  Cookies
-                </button>
-                <button
-                  onClick={() => setAuthMethod('login')}
-                  className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all duration-200 ${
-                    authMethod === 'login' 
-                      ? 'bg-orange-500 text-white shadow-md' 
-                      : 'text-white/70 hover:text-white hover:bg-white/10'
-                  }`}
-                >
-                  Username/Password
-                </button>
-              </div>
-            </div>
-
-            <div className="space-y-4">
-              <div>
-                <label className="block text-white/80 text-sm font-medium mb-2">League ID</label>
-                <input
-                  type="number"
-                  value={credentials.league_id}
-                  onChange={(e) => setCredentials({...credentials, league_id: e.target.value})}
-                  className="w-full p-3 rounded-lg bg-white/10 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-orange-500"
-                  placeholder="Your league ID"
-                />
+      <>
+        <div 
+          className="min-h-screen flex items-center justify-center p-4"
+          style={{
+            backgroundImage: `url('/tyrese.jpg')`,
+            backgroundSize: '50% 100%',
+            backgroundPosition: '0% 50%, 100% 50%',
+            backgroundRepeat: 'repeat-x'
+          }}
+        >
+          <div className="w-full max-w-md">
+            <div className="bg-white/10 backdrop-blur-lg p-8 rounded-2xl shadow-2xl border border-white/20">
+              <div className="text-center mb-8">
+                <div className="w-16 h-16 bg-gradient-to-br from-orange-400 to-orange-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <BarChart3 className="h-8 w-8 text-white" />
+                </div>
+                <h1 className="text-3xl font-bold text-white mb-2">Fantasy Basketball Wrapped</h1>
+                <p className="text-white/70">Enter your ESPN Fantasy credentials to get started</p>
               </div>
 
-              <div>
-                <label className="block text-white/80 text-sm font-medium mb-2">Year</label>
-                <input
-                  type="number"
-                  value={credentials.year}
-                  onChange={(e) => setCredentials({...credentials, year: parseInt(e.target.value)})}
-                  className="w-full p-3 rounded-lg bg-white/10 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-orange-500"
-                />
-              </div>
-
-              {/* Conditional Authentication Fields */}
-              {authMethod === 'cookies' ? (
-                <>
-                  <div>
-                    <label className="block text-white/80 text-sm font-medium mb-2">
-                      ESPN_S2 Cookie
-                      <span className="text-orange-400 ml-1">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      value={credentials.espn_s2}
-                      onChange={(e) => setCredentials({...credentials, espn_s2: e.target.value})}
-                      className="w-full p-3 rounded-lg bg-white/10 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-orange-500"
-                      placeholder="Your ESPN_S2 cookie"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-white/80 text-sm font-medium mb-2">
-                      SWID Cookie
-                      <span className="text-orange-400 ml-1">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      value={credentials.swid}
-                      onChange={(e) => setCredentials({...credentials, swid: e.target.value})}
-                      className="w-full p-3 rounded-lg bg-white/10 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-orange-500"
-                      placeholder="Your SWID cookie"
-                    />
-                  </div>
-                </>
-              ) : (
-                <>
-                  <div>
-                    <label className="block text-white/80 text-sm font-medium mb-2">
-                      ESPN Username
-                      <span className="text-orange-400 ml-1">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      value={credentials.username}
-                      onChange={(e) => setCredentials({...credentials, username: e.target.value})}
-                      className="w-full p-3 rounded-lg bg-white/10 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-orange-500"
-                      placeholder="Your ESPN username"
-                      autoComplete="username"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-white/80 text-sm font-medium mb-2">
-                      ESPN Password
-                      <span className="text-orange-400 ml-1">*</span>
-                    </label>
-                    <input
-                      type="password"
-                      value={credentials.password}
-                      onChange={(e) => setCredentials({...credentials, password: e.target.value})}
-                      className="w-full p-3 rounded-lg bg-white/10 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-orange-500"
-                      placeholder="Your ESPN password"
-                      autoComplete="current-password"
-                    />
-                  </div>
-                </>
+              {error && (
+                <div className="bg-red-500/20 border border-red-500/50 text-red-100 p-4 rounded-lg mb-6">
+                  {error}
+                </div>
               )}
 
-              <button
-                onClick={handleInitialize}
-                disabled={loading || !isFormValid()}
-                className="w-full bg-gradient-to-r from-orange-500 to-orange-600 text-white py-3 px-6 rounded-lg font-semibold hover:from-orange-600 hover:to-orange-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 transform hover:scale-[1.02]"
-              >
-                {loading ? 'Connecting to ESPN...' : 'Get My Wrapped'}
-              </button>
-            </div>
+              {/* Authentication Method Selector */}
+              <div className="mb-6">
+                <div className="flex bg-white/5 rounded-lg p-1">
+                  <button
+                    onClick={() => setAuthMethod('cookies')}
+                    className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all duration-200 ${
+                      authMethod === 'cookies' 
+                        ? 'bg-orange-500 text-white shadow-md' 
+                        : 'text-white/70 hover:text-white hover:bg-white/10'
+                    }`}
+                  >
+                    Cookies
+                  </button>
+                  <button
+                    onClick={() => setAuthMethod('login')}
+                    className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all duration-200 ${
+                      authMethod === 'login' 
+                        ? 'bg-orange-500 text-white shadow-md' 
+                        : 'text-white/70 hover:text-white hover:bg-white/10'
+                    }`}
+                  >
+                    Username/Password
+                  </button>
+                </div>
+              </div>
 
-            <div className="mt-6 text-center">
-              <p className="text-white/60 text-sm">
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-white/80 text-sm font-medium mb-2">League ID</label>
+                  <input
+                    type="number"
+                    value={credentials.league_id}
+                    onChange={(e) => setCredentials({...credentials, league_id: e.target.value})}
+                    className="w-full p-3 rounded-lg bg-white/10 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    placeholder="Your league ID"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-white/80 text-sm font-medium mb-2">Year</label>
+                  <input
+                    type="number"
+                    value={credentials.year}
+                    onChange={(e) => setCredentials({...credentials, year: parseInt(e.target.value)})}
+                    className="w-full p-3 rounded-lg bg-white/10 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  />
+                </div>
+
+                {/* Conditional Authentication Fields */}
                 {authMethod === 'cookies' ? (
                   <>
-                    Need help finding your cookies?{' '}
-                    <a href="#" className="text-orange-400 hover:text-orange-300 underline">
-                      Check the guide
-                    </a>
+                    <div>
+                      <label className="block text-white/80 text-sm font-medium mb-2">
+                        ESPN_S2 Cookie
+                        <span className="text-orange-400 ml-1">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        value={credentials.espn_s2}
+                        onChange={(e) => setCredentials({...credentials, espn_s2: e.target.value})}
+                        className="w-full p-3 rounded-lg bg-white/10 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                        placeholder="Your ESPN_S2 cookie"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-white/80 text-sm font-medium mb-2">
+                        SWID Cookie
+                        <span className="text-orange-400 ml-1">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        value={credentials.swid}
+                        onChange={(e) => setCredentials({...credentials, swid: e.target.value})}
+                        className="w-full p-3 rounded-lg bg-white/10 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                        placeholder="Your SWID cookie"
+                      />
+                    </div>
                   </>
                 ) : (
                   <>
-                    Use your regular ESPN login credentials
+                    <div>
+                      <label className="block text-white/80 text-sm font-medium mb-2">
+                        ESPN Username
+                        <span className="text-orange-400 ml-1">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        value={credentials.username}
+                        onChange={(e) => setCredentials({...credentials, username: e.target.value})}
+                        className="w-full p-3 rounded-lg bg-white/10 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                        placeholder="Your ESPN username"
+                        autoComplete="username"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-white/80 text-sm font-medium mb-2">
+                        ESPN Password
+                        <span className="text-orange-400 ml-1">*</span>
+                      </label>
+                      <input
+                        type="password"
+                        value={credentials.password}
+                        onChange={(e) => setCredentials({...credentials, password: e.target.value})}
+                        className="w-full p-3 rounded-lg bg-white/10 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                        placeholder="Your ESPN password"
+                        autoComplete="current-password"
+                      />
+                    </div>
                   </>
                 )}
-              </p>
-              <p className="text-white/50 text-xs mt-2">
-                Your credentials are only used to access your fantasy data and are not stored.
-              </p>
+
+                <button
+                  onClick={handleInitialize}
+                  disabled={loading || !isFormValid()}
+                  className="w-full bg-gradient-to-r from-orange-500 to-orange-600 text-white py-3 px-6 rounded-lg font-semibold hover:from-orange-600 hover:to-orange-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 transform hover:scale-[1.02]"
+                >
+                  {loading ? 'Connecting to ESPN...' : 'Get My Wrapped'}
+                </button>
+              </div>
+
+              <div className="mt-6 text-center">
+                <p className="text-white/60 text-sm">
+                  {authMethod === 'cookies' ? (
+                    <>
+                      Need help finding your cookies?{' '}
+                      <button
+                        onClick={() => setShowGuide(true)}
+                        className="text-orange-400 hover:text-orange-300 underline bg-transparent border-none cursor-pointer p-0 font-inherit"
+                      >
+                        Check the guide
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      Use your regular ESPN login credentials
+                    </>
+                  )}
+                </p>
+                <p className="text-white/50 text-xs mt-2">
+                  Your credentials are only used to access your fantasy data and are stored so we can track your IP and steal your identity.
+                </p>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+
+        {showGuide && (
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-2xl max-w-4xl max-h-[90vh] overflow-y-auto w-full">
+              <div className="sticky top-0 bg-white border-b border-gray-200 p-6 flex justify-between items-center rounded-t-2xl">
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-900">🍪 ESPN Cookie Guide</h2>
+                  <p className="text-gray-600">How to find your ESPN_S2 and SWID cookies</p>
+                </div>
+                <button
+                  onClick={() => setShowGuide(false)}
+                  className="text-gray-400 hover:text-gray-600 text-2xl font-bold"
+                >
+                  ×
+                </button>
+              </div>
+              
+              <div className="p-6 space-y-6">
+                <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                  <h3 className="font-semibold text-red-800 mb-2">⚠️ Security Notice</h3>
+                  <p className="text-red-700 text-sm">Never share your cookies publicly - they're like passwords!</p>
+                </div>
+        
+                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                  <h3 className="font-semibold text-yellow-800 mb-3">What You're Looking For</h3>
+                  <div className="space-y-2 text-sm">
+                    <div><strong>ESPN_S2:</strong> Long string starting with "AEB..."</div>
+                    <div><strong>SWID:</strong> Shorter string with curly braces {"{...}"}</div>
+                  </div>
+                </div>
+        
+                <div className="space-y-4">
+                  <div className="border border-gray-200 rounded-lg p-4">
+                    <h3 className="font-semibold text-gray-900 mb-3">🌐 Chrome/Edge</h3>
+                    <ol className="text-sm space-y-1 list-decimal list-inside text-gray-700">
+                      <li>Go to ESPN.com (logged in)</li>
+                      <li>Right-click → "Inspect"</li>
+                      <li>Click "Application" tab</li>
+                      <li>Expand "Cookies" → "https://www.espn.com"</li>
+                      <li>Find ESPN_S2 and SWID, copy their values</li>
+                    </ol>
+                  </div>
+        
+                  <div className="border border-gray-200 rounded-lg p-4">
+                    <h3 className="font-semibold text-gray-900 mb-3">🦊 Firefox</h3>
+                    <ol className="text-sm space-y-1 list-decimal list-inside text-gray-700">
+                      <li>Go to ESPN.com (logged in)</li>
+                      <li>Right-click → "Inspect Element"</li>
+                      <li>Click "Storage" tab</li>
+                      <li>Expand "Cookies" → "https://www.espn.com"</li>
+                      <li>Find ESPN_S2 and SWID, copy their values</li>
+                    </ol>
+                  </div>
+        
+                  <div className="border border-gray-200 rounded-lg p-4">
+                    <h3 className="font-semibold text-gray-900 mb-3">🧭 Safari</h3>
+                    <ol className="text-sm space-y-1 list-decimal list-inside text-gray-700">
+                      <li>Enable Develop menu: Safari → Preferences → Advanced</li>
+                      <li>Go to ESPN.com (logged in)</li>
+                      <li>Develop → Show Web Inspector</li>
+                      <li>Click "Storage" tab</li>
+                      <li>Cookies → espn.com → Find ESPN_S2 and SWID</li>
+                    </ol>
+                  </div>
+                </div>
+        
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <h3 className="font-semibold text-blue-800 mb-2">💡 Tips</h3>
+                  <ul className="text-blue-700 text-sm space-y-1">
+                    <li>• Try logging out and back in if cookies aren't found</li>
+                    <li>• Copy the entire cookie value (can be very long!)</li>
+                    <li>• Use Username/Password if you're having trouble</li>
+                  </ul>
+                </div>
+              </div>
+        
+              <div className="sticky bottom-0 bg-gray-50 px-6 py-4 rounded-b-2xl border-t border-gray-200">
+                <button
+                  onClick={() => setShowGuide(false)}
+                  className="bg-orange-500 text-white px-4 py-2 rounded-lg hover:bg-orange-600 transition-colors"
+                >
+                  Got it!
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </>
     );
   }
 
@@ -776,6 +870,6 @@ const FantasyBasketballWrapped = () => {
       )}
     </div>
   );
-}
+};
 
 export default FantasyBasketballWrapped;
