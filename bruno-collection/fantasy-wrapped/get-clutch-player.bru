@@ -1,0 +1,14 @@
+meta {
+  name: Get Clutch Player
+  type: http
+  seq: 8
+}
+
+get {
+  url: {{baseUrl}}/team/clutch
+  body: none
+}
+
+auth:bearer {
+  token: {{token}}
+}

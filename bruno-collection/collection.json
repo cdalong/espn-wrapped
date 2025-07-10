@@ -1,0 +1,15 @@
+{
+    "name": "Fantasy Basketball Wrapped",
+    "version": "1.0.0",
+    "description": "API collection for ESPN Fantasy Basketball Wrapped",
+    "folders": [
+        {
+            "name": "Authentication",
+            "folders": []
+        },
+        {
+            "name": "Team Stats",
+            "folders": []
+        }
+    ]
+}

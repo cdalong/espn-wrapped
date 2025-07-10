@@ -1,0 +1,14 @@
+meta {
+  name: Get Bust
+  type: http
+  seq: 7
+}
+
+get {
+  url: {{baseUrl}}/team/bust
+  body: none
+}
+
+auth:bearer {
+  token: {{token}}
+}
