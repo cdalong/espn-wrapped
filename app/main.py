@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from app.routes import router
+from pathlib import Path
 import os
 
 app = FastAPI(
@@ -24,8 +25,23 @@ app.add_middleware(
 app.include_router(router)
 
 # Serve React static build files (must run `npm run build` first)
-#app.mount("/static", StaticFiles(directory="fantasy-frontend/build/static"), name="static")
-
+static_dir = Path("fantasy-basketball-frontend/build")
+if static_dir.exists():
+    app.mount("/static", StaticFiles(directory=str(static_dir / "static")), name="static")
+    
+    # Serve the React app at the root
+    @app.get("/{full_path:path}")
+    async def serve_react_app(full_path: str):
+        # Serve API routes first, then fallback to React
+        if full_path.startswith("api/"):
+            return {"error": "API route not found"}
+        
+        # Serve index.html for all other routes (React Router)
+        index_file = static_dir / "index.html"
+        if index_file.exists():
+            return FileResponse(index_file)
+        return {"error": "Frontend not found"}
+    
 # Catch-all route to serve index.html for React SPA
 @app.get("/{full_path:path}")
 async def serve_react_app(full_path: str):
