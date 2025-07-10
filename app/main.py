@@ -24,7 +24,7 @@ app.add_middleware(
 app.include_router(router)
 
 # Serve React static build files (must run `npm run build` first)
-app.mount("/static", StaticFiles(directory="fantasy-frontend/build/static"), name="static")
+#app.mount("/static", StaticFiles(directory="fantasy-frontend/build/static"), name="static")
 
 # Catch-all route to serve index.html for React SPA
 @app.get("/{full_path:path}")
