@@ -31,10 +31,10 @@ app.mount("/static", StaticFiles(directory="fantasy-basketball-frontend/build/st
 # Catch-all route to serve index.html for React SPA
 @app.get("/{full_path:path}")
 async def serve_react_app(full_path: str):
-    file_path = f"fantasy-frontend/build/{full_path}"
+    file_path = f"fantasy-basketball-frontend/build/{full_path}"
     if os.path.exists(file_path) and os.path.isfile(file_path):
         return FileResponse(file_path)
-    return FileResponse("fantasy-frontend/build/index.html")
+    return FileResponse("fantasy-basketball-frontend/build/index.html")
 
 # Run locally
 if __name__ == "__main__":
