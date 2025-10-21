@@ -529,10 +529,7 @@ const FantasyBasketballWrapped = () => {
         <div 
           className="min-h-screen flex items-center justify-center p-4"
           style={{
-            backgroundImage: `url('/tyrese.jpg')`,
-            backgroundSize: '50% 100%',
-            backgroundPosition: '0% 50%, 100% 50%',
-            backgroundRepeat: 'repeat-x'
+            background: "linear-gradient(135deg, #232526, #414345)",
           }}
         >
           <div className="w-full max-w-md">
@@ -793,10 +790,7 @@ const FantasyBasketballWrapped = () => {
     <div 
       className="min-h-screen flex flex-col p-4 relative"
       style={{
-        backgroundImage: `url('/tyrese.jpg')`,
-        backgroundSize: '50% 100%',
-        backgroundPosition: '0% 50%, 100% 50%',
-        backgroundRepeat: 'repeat-x'
+        background: "linear-gradient(135deg, #232526, #414345)",
       }}
     >
       {loading ? (
