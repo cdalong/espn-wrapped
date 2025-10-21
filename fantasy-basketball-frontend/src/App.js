@@ -21,7 +21,7 @@ const FantasyBasketballWrapped = () => {
   const [showGuide, setShowGuide] = useState(false);
 
 
-  const API_BASE = 'http://localhost:8000';
+  const API_BASE = 'https://espn-wrapped.onrender.com';
 
   // Title explanations mapping
   const titleExplanations = {
